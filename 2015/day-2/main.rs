@@ -28,6 +28,13 @@ impl Dimensions {
             min().
             unwrap()
     }
+
+    fn len_ribbon(&self) -> i32 {
+        let mut v = [self.length, self.width, self.height];
+        v.sort();
+        self.length * self.width * self.height +
+            v.iter().take(2).fold(0, |s, item| s + item * 2)
+    }
 }
 
 fn dim_from_file(file_name: &str) -> io::Result<Vec<Dimensions>> {
@@ -43,8 +50,11 @@ fn dim_from_file(file_name: &str) -> io::Result<Vec<Dimensions>> {
 
 fn main() -> io::Result<()> {
     if let Ok(dims) = dim_from_file("input.txt") {
-        let square = dims.iter().fold(0, |s, d| s + d.area() + d.extra());
-        println!("square: {}", square);
+        let measure = dims.iter().fold((0, 0), |s, d| {
+            (s.0 + d.area() + d.extra(), s.1 + d.len_ribbon())
+        });
+        println!("square: {}", measure.0);
+        println!("ribbon: {}", measure.1);
     }
     Ok(())
 }
