@@ -20,7 +20,7 @@ fn look_and_say(s: &str) -> String {
             }
         }
     }
-    if  prev.is_some() {
+    if prev.is_some() {
         nums.push((count, prev.unwrap().to_digit(10).unwrap()));
     }
 
@@ -30,11 +30,13 @@ fn look_and_say(s: &str) -> String {
 }
 
 fn main() {
-    let mut s = "1113122113".to_string();
-    for _ in 0..40 {
-        s = look_and_say(&s);
+    for i in [40, 50] {
+        let mut s = "1113122113".to_string();
+        for _ in 0..i {
+            s = look_and_say(&s);
+        }
+        println!("times:{}, len:{}", i, s.len());
     }
-    println!("{}, len:{}", s, s.len());
 }
 
 #[cfg(test)]
