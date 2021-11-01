@@ -56,13 +56,18 @@ fn next_password(s: &str, pos: usize) -> (String, bool) {
 }
 
 fn main() {
-    let mut password = "cqjxjnds".to_string();
+    let next = gen_and_print_next_password("cqjxjnds");
+    gen_and_print_next_password(&next);
+}
+
+fn gen_and_print_next_password(old: &str) -> String {
+    let mut password = old.to_string();
     let pos = 8;
     loop {
         let (new_password, _) = next_password(&password, pos);
         if is_valid_password(&new_password) {
             println!("new password: {}", new_password);
-            return;
+            return new_password;
         }
         password = new_password;
     }
