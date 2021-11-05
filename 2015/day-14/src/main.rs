@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use regex::Regex;
 use std::io::{self, BufRead};
 use std::fs::File;
@@ -33,7 +34,7 @@ fn distance(time: u32, reindeer: &Reindeer) -> u32 {
     while x <= time {
         if x + reindeer.speed.1 <= time {
             x += reindeer.speed.1;
-            d += reindeer.speed.0*reindeer.speed.1;
+            d += reindeer.speed.0 * reindeer.speed.1;
         } else {
             d += reindeer.speed.0 / reindeer.speed.1 * (time - x);
             x += time;
@@ -46,6 +47,71 @@ fn distance(time: u32, reindeer: &Reindeer) -> u32 {
         }
     }
     d
+}
+
+#[derive(Debug, PartialEq)]
+struct Distance {
+    distance: u32,
+    points: u32,
+}
+
+impl Distance {
+    fn new() -> Distance {
+        Distance {
+            distance: 0,
+            points: 0,
+        }
+    }
+}
+
+fn race(time: u32, reindeer: &Vec<Reindeer>) -> HashMap<String, Distance> {
+    let mut result = HashMap::new();
+
+
+    let mut distances: HashMap<String, (Distance, (u32, u32))> = HashMap::new();
+
+    for sec in 1..=time {
+        // calc distances
+        for r in reindeer {
+            let m = distances.get_mut(&r.name);
+            let dist = match m {
+                Some(t) => t,
+                None => {
+                    distances.insert(
+                        r.name.to_string(), (Distance::new(), (0, 0)),
+                    );
+                    distances.get_mut(&r.name).unwrap()
+                }
+            };
+
+            if dist.1.1 > 0 {
+                dist.1.1 -= 1;
+                continue;
+            } else if dist.1.0 >= r.speed.1 {
+                dist.1.1 = r.rest_sec - 1;
+                dist.1.0 = 0;
+                continue;
+            }
+            dist.1.0 += 1;
+
+            dist.0.distance += r.speed.0;
+        }
+
+        let max = distances.values().max_by(|x, y| {
+            x.0.distance.cmp(&y.0.distance)
+        }).unwrap().0.distance;
+
+        for (_, item) in distances.iter_mut() {
+            if item.0.distance == max {
+                item.0.points += 1
+            }
+        }
+    }
+
+    for (name, d) in distances {
+        result.insert(name, d.0);
+    }
+    result
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -66,6 +132,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         distance(TIME, &x)
     }).max();
 
+    let points = race(TIME, &reindeer);
+
     println!("distance: {:?}", max.unwrap());
+    let winner_by_points = points.iter().max_by(|x, y| {
+        x.1.points.cmp(&y.1.points)
+    }).unwrap();
+    println!("winner by points: {:#?}", &winner_by_points);
     Ok(())
 }
