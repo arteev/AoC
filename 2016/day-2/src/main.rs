@@ -47,14 +47,10 @@ struct PinPad {
 
 impl PinPad {
     pub fn new(buttons: Vec<ButtonPin>, position: Point) -> PinPad {
-        let mut p = PinPad {
-            buttons: HashMap::new(),
+        PinPad {
+            buttons: buttons.into_iter().map(|b| (b.pos, b)).collect(),
             position,
-        };
-        for b in buttons {
-            p.buttons.insert(b.pos, b);
         }
-        p
     }
 
     pub fn current(&self) -> Point {
