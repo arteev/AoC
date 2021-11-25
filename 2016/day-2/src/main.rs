@@ -66,8 +66,8 @@ impl PinPad {
         let f = b.edges.iter().find(|&x| *x == m);
         if f.is_none() {
             match m {
-                Move::Up => self.position.1 -= 1,
-                Move::Down => self.position.1 += 1,
+                Move::Up => self.position.1 += 1,
+                Move::Down => self.position.1 -= 1,
                 Move::Left => self.position.0 -= 1,
                 Move::Right => self.position.0 += 1,
             }
@@ -85,21 +85,39 @@ struct Point(i32, i32);
 
 fn main() -> Result<(), Box<dyn Error>> {
     let buttons: Vec<ButtonPin> = vec![
-        ButtonPin::new("1", Point(-1, -1), vec![Move::Up, Move::Left]),
-        ButtonPin::new("2", Point(0, -1), vec![Move::Up]),
-        ButtonPin::new("3", Point(1, -1), vec![Move::Up, Move::Right]),
+        ButtonPin::new("1", Point(-1, 1), vec![Move::Up, Move::Left]),
+        ButtonPin::new("2", Point(0, 1), vec![Move::Up]),
+        ButtonPin::new("3", Point(1, 1), vec![Move::Up, Move::Right]),
         ButtonPin::new("4", Point(-1, 0), vec![Move::Left]),
         ButtonPin::new("5", Point(0, 0), vec![]),
         ButtonPin::new("6", Point(1, 0), vec![Move::Right]),
-        ButtonPin::new("7", Point(-1, 1), vec![Move::Left, Move::Down]),
-        ButtonPin::new("8", Point(0, 1), vec![Move::Down]),
-        ButtonPin::new("9", Point(1, 1), vec![Move::Right, Move::Down]),
+        ButtonPin::new("7", Point(-1, -1), vec![Move::Left, Move::Down]),
+        ButtonPin::new("8", Point(0, -1), vec![Move::Down]),
+        ButtonPin::new("9", Point(1, -1), vec![Move::Right, Move::Down]),
     ];
     let mut pinpad1 = PinPad::new(buttons, Point(0, 0));
+
+    let buttons: Vec<ButtonPin> = vec![
+        ButtonPin::new("1", Point(0, 2), vec![Move::Up, Move::Left, Move::Right]),
+        ButtonPin::new("2", Point(-1, 1), vec![Move::Up, Move::Left]),
+        ButtonPin::new("3", Point(0, 1), vec![]),
+        ButtonPin::new("4", Point(1, 1), vec![Move::Up, Move::Right]),
+        ButtonPin::new("5", Point(-2, 0), vec![Move::Up, Move::Left, Move::Down]),
+        ButtonPin::new("6", Point(-1, 0), vec![]),
+        ButtonPin::new("7", Point(0, 0), vec![]),
+        ButtonPin::new("8", Point(1, 0), vec![]),
+        ButtonPin::new("9", Point(2, 0), vec![Move::Up, Move::Down, Move::Right]),
+        ButtonPin::new("A", Point(-1, -1), vec![Move::Down, Move::Left]),
+        ButtonPin::new("B", Point(0, -1), vec![]),
+        ButtonPin::new("C", Point(1, -1), vec![Move::Down, Move::Right]),
+        ButtonPin::new("D", Point(0, -2), vec![Move::Down, Move::Right, Move::Left]),
+    ];
+    let mut pinpad2 = PinPad::new(buttons, Point(-2, 0));
 
     let file = File::open("input.txt")?;
     let lines = io::BufReader::new(file).lines();
     let mut digits = String::new();
+    let mut digits2 = String::new();
 
     for line in lines {
         let l = line?;
@@ -109,10 +127,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         for ch in l.chars() {
             let m = Move::from_char(&ch);
             pinpad1.mov(m?);
+            pinpad2.mov(m?);
         }
-        digits.push_str(pinpad1.current_digit().as_str())
+        digits.push_str(pinpad1.current_digit().as_str());
+        digits2.push_str(pinpad2.current_digit().as_str());
     }
-    println!("{:?}", digits);
+    println!("pin1: {:?}", digits);
+    println!("pin2: {:?}", digits2);
     Ok(())
 }
 
