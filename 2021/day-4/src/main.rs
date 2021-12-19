@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fs::File;
@@ -98,12 +99,23 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    let mut winners = 0;
+    let mut boards_wins = vec![false; boards.len()];
+    let count = numbers.len();
     for n in numbers {
-        for b in boards.iter_mut() {
+        for (i, b) in boards.iter_mut().enumerate() {
             if b.bingo(n) {
-                let sum = b.score();
-                println!("score: {} (n={})", sum * n, n);
-                return Ok(());
+                if !boards_wins[i] {
+                    boards_wins[i] = true;
+                    winners += 1;
+                    if winners == 1 {
+                        let sum = b.score();
+                        println!("PART1: score: {} (n={})", sum * n, n);
+                    } else if winners == count {
+                        let sum = b.score();
+                        println!("PART2: score: {} (n={})", sum * n, n);
+                    }
+                }
             }
         }
     }
