@@ -23,7 +23,7 @@ impl FromStr for Lanternfish {
 impl Lanternfish {
     fn tick(&mut self) -> bool {
         self.t -= 1;
-        if self.t <0 {
+        if self.t < 0 {
             self.t = 6;
             return true;
         }
@@ -33,10 +33,19 @@ impl Lanternfish {
 
 fn main() -> Result<(),Box<dyn Error>>{
 
+    let args: Vec<String> = std::env::args().collect();
+
+    let mut days = 80;
+    if args.len()>1 {
+        days = args[1].parse().unwrap();
+    }
+
+
     let file = File::open("input.txt")?;
     let lines = io::BufReader::new(file).lines().map(|x|x.unwrap());
 
-    let mut fishes = Vec::new();
+    let size = 2usize.pow(days/16);
+    let mut fishes = Vec::with_capacity(size);
 
     for line in lines {
         for p in  line.split(",") {
@@ -46,15 +55,18 @@ fn main() -> Result<(),Box<dyn Error>>{
     }
 
     
-    for _day in 0..80 {
-        let mut fishes_new = Vec::new();
+    for day in 0..days {
+        let mut count_new = 0;
 
         for fish in fishes.iter_mut() {
             if fish.tick() {
-                fishes_new.push(Lanternfish{t:8});
+                count_new += 1;
             }
         }
-        fishes.append( &mut fishes_new);
+        for i in 0..count_new {
+            fishes.push(Lanternfish{t:8});
+        }
+        println!("days:{}, count:{}", day+1, fishes.len());
     }
 
     println!("count {:?}", fishes.len());
