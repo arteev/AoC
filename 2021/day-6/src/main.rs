@@ -1,35 +1,7 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead,self};
-use std::str::FromStr;
-use std::num::ParseIntError;
-
-#[derive(Debug)]
-struct Lanternfish {
-    t: i32,
-}
-
-impl FromStr for Lanternfish {
-    type Err = ParseIntError;
-    fn from_str(s: &str) -> Result<Self,Self::Err> {
-        Ok(
-            Lanternfish{
-                t: s.parse()?,
-            }
-        )
-    }
-}
-
-impl Lanternfish {
-    fn tick(&mut self) -> bool {
-        self.t -= 1;
-        if self.t < 0 {
-            self.t = 6;
-            return true;
-        }
-        false
-    }
-}
+use std::collections::HashMap;
 
 fn main() -> Result<(),Box<dyn Error>>{
 
@@ -40,36 +12,36 @@ fn main() -> Result<(),Box<dyn Error>>{
         days = args[1].parse().unwrap();
     }
 
-
     let file = File::open("input.txt")?;
     let lines = io::BufReader::new(file).lines().map(|x|x.unwrap());
 
-    let size = 2usize.pow(days/16);
-    let mut fishes = Vec::with_capacity(size);
+
+    let mut fish_map:HashMap<i32,u64> = HashMap::new(); 
 
     for line in lines {
         for p in  line.split(",") {
-            let fish = p.parse::<Lanternfish>().unwrap();
-            fishes.push(fish);
+            let f: i32 = p.parse().unwrap();
+            let fish = fish_map.entry(f).or_insert(0);
+            *fish += 1;
         }
     }
 
     
-    for day in 0..days {
-        let mut count_new = 0;
-
-        for fish in fishes.iter_mut() {
-            if fish.tick() {
-                count_new += 1;
+    for _day in 0..days {
+        let mut updated:HashMap<i32,u64> = HashMap::new();
+        for (fish,count) in &fish_map {
+            if *fish ==0 {
+                *updated.entry(6).or_default() += count;
+                *updated.entry(8).or_default() += count;
+            } else {
+                *updated.entry(fish-1).or_default() += count;
             }
         }
-        for i in 0..count_new {
-            fishes.push(Lanternfish{t:8});
-        }
-        println!("days:{}, count:{}", day+1, fishes.len());
+        fish_map = updated;
     }
 
-    println!("count {:?}", fishes.len());
+    let count = fish_map.values().cloned().collect::<Vec<u64>>().iter().sum::<u64>();
+    println!("count {:?}",count);
     Ok(())
 }
 
