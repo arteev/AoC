@@ -8,6 +8,20 @@ fn calculate(pos: u32, v: &Vec<u32>) -> u32 {
     })
 }
 
+fn calculate_part2(pos: u32, v: &Vec<u32>) -> u32 {
+    v.iter().fold(0, |s, &x| {
+        s+{
+            let steps=(pos as i32 - x as i32).abs() as u32;
+            if steps>1 {
+                (1+steps)*steps /2 
+            } else {
+                steps
+            }
+        }
+    })
+
+}
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file = File::open("input.txt")?;
@@ -26,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut fuel: Option<u32> = None;
 
     for i in 0..=*max {
-        let c = calculate(i, &positions);
+        let c = calculate_part2(i, &positions);
         if fuel.is_none() || fuel.unwrap() > c {
             m_pos = Some(i);
             fuel=Some(c);
